@@ -1,0 +1,75 @@
+#include <iostream>
+#include <queue>
+#include <vector>
+#include <unordered_map>
+
+using namespace std;
+
+// Huffman Tree Node
+struct HuffmanNode {
+    char data;
+    int freq;
+    HuffmanNode *left, *right;
+
+    HuffmanNode(char data, int freq) {
+        this->data = data;
+        this->freq = freq;
+        left = right = nullptr;
+    }
+};
+
+// Comparator for Min-Heap
+struct Compare {
+    bool operator()(HuffmanNode* l, HuffmanNode* r) {
+        return l->freq > r->freq; // Min-Heap
+    }
+};
+
+// Function to generate Huffman Codes and print in preorder traversal
+void printHuffmanCodes(HuffmanNode* root, string code) {
+    if (!root) return;
+
+    // Print the code if it's a leaf node
+    if (!root->left && !root->right) {
+        cout << code << " ";
+    }
+
+    // Preorder traversal: root → left → right
+    printHuffmanCodes(root->left, code + "0");
+    printHuffmanCodes(root->right, code + "1");
+}
+
+// Function to build Huffman Tree and print codes
+void buildHuffmanTree(string S, vector<int> f) {
+    priority_queue<HuffmanNode*, vector<HuffmanNode*>, Compare> minHeap;
+
+    // Step 1: Create leaf nodes and push to min heap
+    for (size_t i = 0; i < S.size(); i++) {
+        minHeap.push(new HuffmanNode(S[i], f[i]));
+    }
+
+    // Step 2: Build Huffman Tree
+    while (minHeap.size() > 1) {
+        HuffmanNode *left = minHeap.top(); minHeap.pop();
+        HuffmanNode *right = minHeap.top(); minHeap.pop();
+
+        // Create an internal node with combined frequency
+        HuffmanNode* newNode = new HuffmanNode('$', left->freq + right->freq);
+        newNode->left = left;
+        newNode->right = right;
+
+        minHeap.push(newNode);
+    }
+
+    // Step 3: Print Huffman Codes in Preorder Traversal
+    HuffmanNode* root = minHeap.top();
+    printHuffmanCodes(root, "");
+}
+
+int main() {
+    string S = "abcdef";
+    vector<int> f = {5, 9, 12, 13, 16, 45};
+
+    buildHuffmanTree(S, f);
+    return 0;
+}
